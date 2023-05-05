@@ -4,6 +4,7 @@ using OpenQA.Selenium.DevTools.V110.Debugger;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Drawing;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml.Linq;
 using Telegram.Bot;
@@ -85,7 +86,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
             IWebDriver driver = new ChromeDriver();
 
-            //driver.Manage().Window.Minimize();
+            driver.Manage().Window.Position = new Point(-5000, -5000);//window moves so you can't see it
 
             driver.Navigate().GoToUrl("https://www.google.ru/imghp?hl=en&ogbl"); //enters Google Pictures
 
