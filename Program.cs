@@ -72,13 +72,13 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         string searchText = messageText.TrimStart(TrimmingFinderArray); //making our request
 
 
-        if (searchText != "")//protect bot from glitching
+        if (searchText != "")//protects bot from glitching
         {
             
             //Message helpMessage = await botClient.SendTextMessageAsync(
             //chatId: chatId,
             //text: searchText,
-            //parseMode: ParseMode.Html,        debug only
+            //parseMode: ParseMode.Html,        //debug only
             //disableNotification: true,
             //cancellationToken: cancellationToken);
 
@@ -86,252 +86,151 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
             IWebDriver driver = new ChromeDriver();
 
-            driver.Manage().Window.Position = new Point(-5000, -5000);//window moves so you can't see it
+            //driver.Manage().Window.Position = new Point(-5000, -5000);//window moves so you can't see it
 
             driver.Navigate().GoToUrl("https://www.google.ru/imghp?hl=en&ogbl"); //enters Google Pictures
 
             bool IsSearchBarFound = false ; //boolean variable to check if search bar was found
-            bool IsSearchBarNotFound = false ;
 
-            try
-            {
-                int i = 0; //counter
-                while ((IsSearchBarNotFound == false && IsSearchBarFound == false) != false || i < 10) //if both of them are false, then it stops
-                {
-                    
-                    IWebElement searchBar;
-                    try 
-                    {
-                        
-                        searchBar = driver.FindElement(By.XPath("//textarea[@type='search']"));
-                        searchBar.SendKeys(searchText);
-                        searchBar.SendKeys(Keys.Enter);
+            try //finding search bar
+            {            
+                IWebElement searchBar;
+                //searchBar = driver.FindElement(By.XPath("//textarea[@type='search']"));
+                searchBar = driver.FindElement(By.CssSelector("#APjFqb"));
+                searchBar.SendKeys(searchText);
+                searchBar.SendKeys(Keys.Enter);
 
-                        IsSearchBarFound = true;
-                        i = 10;
-                    }
-                    catch 
-                    { 
-                        Console.WriteLine("Error: cant find search bar");
-                        ++i;
-                        if(i >= 10)
-                        {
-                            IsSearchBarNotFound = true;
-                        }
-
-                    }
-                }
+                IsSearchBarFound = true ;
             }
             catch //if search bar wasn't found
             {
-                Console.WriteLine("Error: can't access search bar");
-                driver.Close();
+                Console.WriteLine("Error: can't access search bar");//printing message in console
 
-                Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "Error accured, please try again later",
-                parseMode: ParseMode.Html,
-                disableNotification: true,
-                cancellationToken: cancellationToken);
+                //Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
+                //chatId: chatId,
+                //text: "Error accured, please try again later",//messaging user
+                //parseMode: ParseMode.Html,
+                //disableNotification: true,
+                //cancellationToken: cancellationToken);
             }
 
             bool isPictureWasFound = false;
-            bool isPictureWasNotFound = false ;
 
-            try //finding picture on the site to click
+            if (IsSearchBarFound)
             {
-                int i = 0;
-                while ((isPictureWasNotFound == false && isPictureWasFound == false) != false || i<10)
+                try //finding picture on the site to click
                 {
-                    try
-                    {
-                        IWebElement pictureElement = driver.FindElement(By.XPath("//*[@id=\"islrg\"]/div[1]/div[1]/a[1]/div[1]"));// finds picture
 
-                        new Actions(driver)
-                              .Click(pictureElement)
-                            .Perform();
+                    //IWebElement pictureElement = driver.FindElement(By.XPath("//*[@id=\"islrg\"]/div[1]/div[1]/a[1]/div[1]"));// alternative
+                    IWebElement pictureElement = driver.FindElement(By.CssSelector("#islrg > div.islrc > div:nth-child(2) > a.wXeWr.islib.nfEiy > div.bRMDJf.islir > img"));
+                    new Actions(driver)
+                            .Click(pictureElement)
+                        .Perform();
 
-                        isPictureWasFound = true;
-                        i = 10;
+                    isPictureWasFound = true;
 
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Error: cant find picture");
-                        ++i;
-                        if(i >= 10)
-                        {
-                            isPictureWasNotFound = true;
-                        }
-                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Error: can't find picture on the site");
+
+                    //Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
+                    //chatId: chatId,
+                    //text: "Error accured, please try again later",
+                    //parseMode: ParseMode.Html,
+                    //disableNotification: true,
+                    //cancellationToken: cancellationToken);
                 }
             }
-            catch
-            {
-                Console.WriteLine("Error: can't find picture on the site");
-                driver.Close();
 
-                Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "Error accured, please try again later",
-                parseMode: ParseMode.Html,
-                disableNotification: true,
-                cancellationToken: cancellationToken);
-            }
-
-            try //finding three points element to press, so we can get acces to share button
+            bool isThreePointsFound = false;
+            if (isPictureWasFound)
             {
-                int i = 0;
-                bool isThreePointsFound = true;
-                bool isThreePointsNotFound = false ;
-                while ((isThreePointsNotFound == false && isThreePointsFound == false) != false || i<10)
+                try //finding three points element to press, so we can get acces to share button
                 {
-                    try
-                    {
-                        IWebElement threePointsElement = driver.FindElement(By.XPath("//*[@id=\"Sva75c\"]/div[2]/div/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[2]/div/div[2]/div[2]/div/a/div"));
 
+                    IWebElement threePointsElement = driver.FindElement(By.CssSelector("#Sva75c > div.DyeYj > div > div.dFMRD > div.pxAole > div.tvh9oe.BIB1wf > c-wiz > div > div > div > div:nth-child(2) > div > div > div.Ox7icf > div:nth-child(2) > div > a > div > svg"));
+                    //#Sva75c > div.DyeYj > div > div.dFMRD > div.pxAole > div.tvh9oe.BIB1wf > c-wiz > div > div > div > div:nth-child(2) > div > div > div.Ox7icf > div:nth-child(2) > div > a > div > svg
+                    //#Sva75c > div.DyeYj > div > div.dFMRD > div.pxAole > div.tvh9oe.BIB1wf > c-wiz > div > div > div > div:nth-child(2) > div > div > div.Ox7icf > div:nth-child(2) > div > a > div
+                    new Actions(driver)//clicks on menu that opens options for an image
+                          .Click(threePointsElement)
+                        .Perform();
+                    isThreePointsFound = true;
+                }
+                catch
+                {
+                    Console.WriteLine("Error: can't find three points element on the site");
 
-                        new Actions(driver)//clicks on menu that opens options for an image
-                              .Click(threePointsElement)
-                            .Perform();
-
-                        isThreePointsFound = true;
-                        i = 10;
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Error: cant find three points");
-                        ++i;
-                        if(i >= 10)
-                        {
-                            isThreePointsNotFound = true;
-                        }
-                    }
+                    //Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
+                    //chatId: chatId,
+                    //text: "Error accured, please try again later",
+                    //parseMode: ParseMode.Html,
+                    //disableNotification: true,
+                    //cancellationToken: cancellationToken);
                 }
             }
-            catch 
-            {
-                Console.WriteLine("Error: can't find three points element on the site");
-                driver.Close();
+            bool isShareButtonFound = false;
 
-                Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "Error accured, please try again later",
-                parseMode: ParseMode.Html,
-                disableNotification: true,
-                cancellationToken: cancellationToken);
-            }
-
-            try
+            if (isThreePointsFound == true) 
             {
-                bool isShareButtonFound = false;
-                bool isShareButtonNotFound = false;
-                int i = 0;
-                while ((isShareButtonNotFound == false && isShareButtonFound == false) != false || i < 10)
+                try 
+                { 
+
+                    IWebElement shareButton = driver.FindElement(By.CssSelector("#Sva75c > div.DyeYj > div > div.dFMRD > div.pxAole > div.tvh9oe.BIB1wf > c-wiz > div > div > div > div:nth-child(2) > div > div > div.Ox7icf > div:nth-child(2) > div > div > div:nth-child(1) > a"));
+                    new Actions(driver)
+                            .Click(shareButton)
+                        .Perform();
+                    isShareButtonFound = true;
+                }
+                catch
                 {
-                    try //finding share button to press
-                    {
-                        IWebElement shareButton = driver.FindElement(By.XPath("//*[@id=\"Sva75c\"]/div[2]/div/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[2]/div/div[2]/div[2]/div/div/div"));
+                    Console.WriteLine("Error: can't find share button");
 
-
-                        new Actions(driver)
-                              .Click(shareButton)
-                            .Perform();
-                        isShareButtonFound = true;
-                        i = 10;
-
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Error: cant find share button");
-                        ++i;
-                        if (i >= 10)
-                        {
-                            isShareButtonNotFound = true;
-                        }
-                    }
+                    //Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
+                    //chatId: chatId,
+                    //text: "Error accured, please try again later",
+                    //parseMode: ParseMode.Html,
+                    //disableNotification: true,
+                    //cancellationToken: cancellationToken);
                 }
             }
-            catch
+
+
+            if (isShareButtonFound == true)
             {
-                Console.WriteLine("Error: can't find share button");
-                driver.Close();
+                try
+                {//finding link to photo
 
-                Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "Error accured, please try again later",
-                parseMode: ParseMode.Html,
-                disableNotification: true,
-                cancellationToken: cancellationToken);
-            }
 
-            try//finding link to photo
-            {
-                string linkToPhoto = driver.FindElement(By.XPath("//*[@id=\"yDmH0d\"]/div[6]/div/div[2]/span/div/div/div[4]/a")).GetAttribute("href");
+                    //bool isPictureLinkFound = false;
+                    //Console.WriteLine(i); debug only'
 
-                Console.WriteLine(linkToPhoto);//debug only
+                    string linkToPhoto = driver.FindElement(By.ClassName("c1AlVc")).GetAttribute("href");
+                    Console.WriteLine(linkToPhoto);//debug only
 
-                bool isPictureLinkFound = false;
-                bool isPictureLinkNotFound = false;
-                int i = 0;
-                while((isPictureLinkNotFound != true && isPictureLinkFound == false) != false || i<10)
+                    Message messageSendsPicture = await botClient.SendPhotoAsync(
+                    chatId: chatId,
+                    photo: linkToPhoto,
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+
+                    driver.Close();
+                }
+                catch
                 {
-                    //Console.WriteLine(i); debug only
-                    try
-                    {
-                        Message messageSendsPicture = await botClient.SendPhotoAsync(
-                        chatId: chatId,
-                        photo: linkToPhoto,
-                        parseMode: ParseMode.Html,
-                        cancellationToken: cancellationToken);
+                    Console.WriteLine("Error: can't find link to photo");
+                    driver.Close();
 
-                        isPictureLinkFound = true;
-
-                        i = 10;
-
-                        driver.Close();
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Error: cant send link to photo");
-
-                        i++;
-                        if(isPictureLinkFound == false) 
-                        {
-                            try
-                            {
-                                Message messageSendsPicture = await botClient.SendPhotoAsync(
-                                chatId: chatId,
-                                photo: linkToPhoto,
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
-                                isPictureLinkFound = true;
-                            }
-                            catch 
-                            { 
-                                
-                            }
-
-                        }
-
-                        if (i >= 10) 
-                        {
-                            isPictureLinkNotFound = true;
-                            driver.Close();
-
-                            Message MessageOfUnaccesableLinkToPicture = await botClient.SendTextMessageAsync(
-                            chatId: chatId,
-                            text: "Error accured, please try again",
-                            parseMode: ParseMode.Html,
-                            disableNotification: true,
-                            cancellationToken: cancellationToken);
-                        }
-                    }
+                    Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Error accured, please try again",
+                    parseMode: ParseMode.Html,
+                    disableNotification: true,
+                    cancellationToken: cancellationToken);
                 }
             }
-            catch
+            else
             {
-                Console.WriteLine("Error: can't find link to photo");
                 driver.Close();
 
                 Message MessageOfUnaccesableSearchBar = await botClient.SendTextMessageAsync(
@@ -352,7 +251,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
              cancellationToken: cancellationToken);
         }
     }
-    else if (isHelpInfoSeen == false)
+    else if (isHelpInfoSeen == false) //blocks this information if /help send or else it will show both messages in a same time
     {
         Message helpMessage = await botClient.SendTextMessageAsync(
         chatId: chatId,
